@@ -271,7 +271,7 @@ export default function Home() {
         }
 
         const headers = jsonData[0] as string[];
-        const rows = jsonData.slice(1) as any[][];
+        const rows = jsonData.slice(1) as (string | number | null | undefined)[][];
 
         const importedMaterials: Material[] = rows
           .filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== undefined))
@@ -307,13 +307,13 @@ export default function Home() {
                     material.unit = String(value);
                     break;
                   case 'cantidad actual':
-                    material.quantity = parseFloat(value) || 0;
+                    material.quantity = parseFloat(String(value)) || 0;
                     break;
                   case 'cantidad mínima':
-                    material.minQuantity = parseFloat(value) || 0;
+                    material.minQuantity = parseFloat(String(value)) || 0;
                     break;
                   case 'precio por unidad':
-                    material.price = parseFloat(value) || 0;
+                    material.price = parseFloat(String(value)) || 0;
                     break;
                   case 'ubicación':
                     material.location = String(value);
@@ -443,13 +443,13 @@ export default function Home() {
                     material.unit = value;
                     break;
                   case 'cantidad actual':
-                    material.quantity = parseFloat(value) || 0;
+                    material.quantity = parseFloat(String(value)) || 0;
                     break;
                   case 'cantidad mínima':
-                    material.minQuantity = parseFloat(value) || 0;
+                    material.minQuantity = parseFloat(String(value)) || 0;
                     break;
                   case 'precio por unidad':
-                    material.price = parseFloat(value) || 0;
+                    material.price = parseFloat(String(value)) || 0;
                     break;
                   case 'ubicación':
                     material.location = value;
@@ -555,9 +555,9 @@ export default function Home() {
             size: item.size || '',
             dimensions: item.dimensions || '',
             unit: item.unit || 'unidades',
-            quantity: parseFloat(item.quantity) || 0,
-            minQuantity: parseFloat(item.minQuantity) || 0,
-            price: parseFloat(item.price) || 0,
+            quantity: parseFloat(String(item.quantity)) || 0,
+            minQuantity: parseFloat(String(item.minQuantity)) || 0,
+            price: parseFloat(String(item.price)) || 0,
             location: item.location,
             supplier: item.supplier || '',
             notes: item.notes || '',
