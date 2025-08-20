@@ -17,6 +17,26 @@ export default function Home() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Cargar datos del localStorage al iniciar
+  useEffect(() => {
+    const savedMaterials = localStorage.getItem('inventario-materials');
+    if (savedMaterials) {
+      try {
+        const parsedMaterials = JSON.parse(savedMaterials);
+        setMaterials(parsedMaterials);
+      } catch (error) {
+        console.error('Error al cargar datos del localStorage:', error);
+      }
+    }
+  }, []);
+
+  // Guardar datos en localStorage cada vez que cambien
+  useEffect(() => {
+    if (materials.length > 0) {
+      localStorage.setItem('inventario-materials', JSON.stringify(materials));
+    }
+  }, [materials]);
+
   // Filtrar materiales
   useEffect(() => {
     let filtered = materials;
