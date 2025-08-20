@@ -34,3 +34,17 @@ export interface MaterialFormData {
   supplier: string;
   notes: string;
 }
+
+export interface Project {
+  id: string;
+  name: string;
+  fileName?: string;
+  materials: Material[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectFormData {
+  name: string;
+  fileName?: string;
+}

@@ -4,38 +4,57 @@ import { useState, useEffect, useRef } from 'react';
 import { MaterialForm } from '../components/MaterialForm';
 import { MaterialList } from '../components/MaterialList';
 import { MaterialStats } from '../components/MaterialStats';
-import { Material } from '@/types/material';
+import { Material, Project } from '@/types/material';
 import * as XLSX from 'xlsx';
 
 export default function Home() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [filteredMaterials, setFilteredMaterials] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+  const [showProjectForm, setShowProjectForm] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Cargar datos del localStorage al iniciar
+  // Cargar proyectos del localStorage al iniciar
   useEffect(() => {
-    const savedMaterials = localStorage.getItem('inventario-materials');
-    if (savedMaterials) {
+    const savedProjects = localStorage.getItem('inventario-projects');
+    if (savedProjects) {
       try {
-        const parsedMaterials = JSON.parse(savedMaterials);
-        setMaterials(parsedMaterials);
+        const parsedProjects = JSON.parse(savedProjects);
+        setProjects(parsedProjects);
+        
+        // Si hay proyectos, cargar el primero como proyecto actual
+        if (parsedProjects.length > 0) {
+          setCurrentProject(parsedProjects[0]);
+          setMaterials(parsedProjects[0].materials);
+        }
       } catch (error) {
-        console.error('Error al cargar datos del localStorage:', error);
+        console.error('Error al cargar proyectos del localStorage:', error);
       }
     }
   }, []);
 
-  // Guardar datos en localStorage cada vez que cambien
+  // Guardar proyectos en localStorage cada vez que cambien
   useEffect(() => {
-    if (materials.length > 0) {
-      localStorage.setItem('inventario-materials', JSON.stringify(materials));
+    if (projects.length > 0) {
+      localStorage.setItem('inventario-projects', JSON.stringify(projects));
     }
-  }, [materials]);
+  }, [projects]);
+
+  // Actualizar materiales del proyecto actual
+  useEffect(() => {
+    if (currentProject) {
+      setMaterials(currentProject.materials);
+    } else {
+      setMaterials([]);
+    }
+  }, [currentProject]);
 
   // Filtrar materiales
   useEffect(() => {
@@ -56,60 +75,184 @@ export default function Home() {
     setFilteredMaterials(filtered);
   }, [materials, searchTerm, selectedCategory]);
 
+  // Función para crear un nuevo proyecto
+  const createProject = (projectData: { name: string; fileName?: string }) => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      name: projectData.name,
+      fileName: projectData.fileName,
+      materials: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    setProjects(prev => [...prev, newProject]);
+    setCurrentProject(newProject);
+    setShowProjectForm(false);
+    
+    setImportStatus({ 
+      type: 'success', 
+      message: `Proyecto "${projectData.name}" creado exitosamente` 
+    });
+    setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+  };
+
+  // Función para editar un proyecto
+  const updateProject = (id: string, updates: Partial<Project>) => {
+    setProjects(prev => prev.map(project =>
+      project.id === id
+        ? { ...project, ...updates, updatedAt: new Date().toISOString() }
+        : project
+    ));
+    
+    // Si es el proyecto actual, actualizarlo también
+    if (currentProject?.id === id) {
+      setCurrentProject(prev => prev ? { ...prev, ...updates, updatedAt: new Date().toISOString() } : null);
+    }
+    
+    setEditingProject(null);
+    
+    setImportStatus({ 
+      type: 'success', 
+      message: `Proyecto actualizado exitosamente` 
+    });
+    setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+  };
+
+  // Función para cambiar de proyecto
+  const switchProject = (project: Project) => {
+    setCurrentProject(project);
+    setMaterials(project.materials);
+    setSearchTerm('');
+    setSelectedCategory('all');
+    setEditingMaterial(null);
+  };
+
+  // Función para eliminar un proyecto
+  const deleteProject = (id: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este proyecto? Se perderán todos los materiales.')) {
+      setProjects(prev => prev.filter(project => project.id !== id));
+      
+      // Si se eliminó el proyecto actual, cambiar al primero disponible
+      if (currentProject?.id === id) {
+        const remainingProjects = projects.filter(project => project.id !== id);
+        if (remainingProjects.length > 0) {
+          setCurrentProject(remainingProjects[0]);
+          setMaterials(remainingProjects[0].materials);
+        } else {
+          setCurrentProject(null);
+          setMaterials([]);
+        }
+      }
+      
+      setImportStatus({ 
+        type: 'success', 
+        message: `Proyecto eliminado exitosamente` 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+    }
+  };
+
+  // Función para agregar material al proyecto actual
   const addMaterial = (material: Omit<Material, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes crear o seleccionar un proyecto primero' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     const newMaterial: Material = {
       ...material,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setMaterials(prev => [...prev, newMaterial]);
     
-    // Mostrar mensaje de éxito
+    const updatedMaterials = [...materials, newMaterial];
+    setMaterials(updatedMaterials);
+    
+    // Actualizar el proyecto en la lista
+    setProjects(prev => prev.map(project =>
+      project.id === currentProject.id
+        ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+        : project
+    ));
+    
+    // Actualizar el proyecto actual
+    setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+    
     setImportStatus({ 
       type: 'success', 
-      message: `Material "${material.name}" agregado exitosamente. Recuerda exportar tus datos para guardarlos.` 
+      message: `Material "${material.name}" agregado al proyecto "${currentProject.name}"` 
     });
-    
-    // Limpiar mensaje después de 5 segundos
-    setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
+    setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
   };
 
+  // Función para actualizar material
   const updateMaterial = (id: string, updates: Partial<Material>) => {
-    setMaterials(prev => prev.map(material =>
+    if (!currentProject) return;
+
+    const updatedMaterials = materials.map(material =>
       material.id === id
         ? { ...material, ...updates, updatedAt: new Date().toISOString() }
         : material
+    );
+    
+    setMaterials(updatedMaterials);
+    
+    // Actualizar el proyecto en la lista
+    setProjects(prev => prev.map(project =>
+      project.id === currentProject.id
+        ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+        : project
     ));
+    
+    // Actualizar el proyecto actual
+    setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+    
     setEditingMaterial(null);
     
-    // Mostrar mensaje de éxito
     setImportStatus({ 
       type: 'success', 
-      message: `Material actualizado exitosamente. Recuerda exportar tus datos para guardarlos.` 
+      message: `Material actualizado exitosamente` 
     });
-    
-    // Limpiar mensaje después de 5 segundos
-    setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
+    setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
   };
 
+  // Función para eliminar material
   const deleteMaterial = (id: string) => {
+    if (!currentProject) return;
+
     if (confirm('¿Estás seguro de que quieres eliminar este material?')) {
-      setMaterials(prev => prev.filter(material => material.id !== id));
+      const updatedMaterials = materials.filter(material => material.id !== id);
+      setMaterials(updatedMaterials);
       
-      // Mostrar mensaje de éxito
+      // Actualizar el proyecto en la lista
+      setProjects(prev => prev.map(project =>
+        project.id === currentProject.id
+          ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+          : project
+      ));
+      
+      // Actualizar el proyecto actual
+      setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+      
       setImportStatus({ 
         type: 'success', 
-        message: `Material eliminado exitosamente. Recuerda exportar tus datos para guardarlos.` 
+        message: `Material eliminado exitosamente` 
       });
-      
-      // Limpiar mensaje después de 5 segundos
-      setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
     }
   };
 
+  // Función para actualizar cantidad
   const updateQuantity = (id: string, newQuantity: number, operation: 'add' | 'subtract') => {
-    setMaterials(prev => prev.map(material => {
+    if (!currentProject) return;
+
+    const updatedMaterials = materials.map(material => {
       if (material.id === id) {
         const currentQuantity = material.quantity;
         let newQuantityValue = currentQuantity;
@@ -127,19 +270,38 @@ export default function Home() {
         };
       }
       return material;
-    }));
+    });
     
-    // Mostrar mensaje de éxito
+    setMaterials(updatedMaterials);
+    
+    // Actualizar el proyecto en la lista
+    setProjects(prev => prev.map(project =>
+      project.id === currentProject.id
+        ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+        : project
+    ));
+    
+    // Actualizar el proyecto actual
+    setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+    
     setImportStatus({ 
       type: 'success', 
       message: `Cantidad actualizada. Recuerda exportar tus datos para guardarlos.` 
     });
-    
-    // Limpiar mensaje después de 3 segundos
     setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
   };
 
+  // Función para exportar proyecto actual
   const exportToExcel = () => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes seleccionar un proyecto para exportar' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     // Preparar datos para Excel
     const excelData = materials.map(material => ({
       'ID': material.id,
@@ -169,60 +331,41 @@ export default function Home() {
 
     // Ajustar ancho de columnas
     const colWidths = [
-      { wch: 10 }, // ID
-      { wch: 25 }, // Nombre
-      { wch: 30 }, // Descripción
-      { wch: 15 }, // Categoría
-      { wch: 15 }, // Marca
-      { wch: 10 }, // Color
-      { wch: 10 }, // Tamaño
-      { wch: 15 }, // Medidas
-      { wch: 10 }, // Unidad
-      { wch: 15 }, // Cantidad Actual
-      { wch: 15 }, // Cantidad Mínima
-      { wch: 15 }, // Precio por Unidad
-      { wch: 15 }, // Valor Total
-      { wch: 20 }, // Ubicación
-      { wch: 20 }, // Proveedor
-      { wch: 30 }, // Notas
-      { wch: 15 }, // Fecha Creación
-      { wch: 15 }  // Última Actualización
+      { wch: 10 }, { wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 15 },
+      { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 15 },
+      { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 30 },
+      { wch: 15 }, { wch: 15 }
     ];
     ws['!cols'] = colWidths;
 
     // Descargar archivo
-    const fileName = `Inventario_Construccion_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `${currentProject.name}_Inventario_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
     
-    // Mostrar mensaje de éxito
     setImportStatus({ 
       type: 'success', 
       message: `Archivo Excel "${fileName}" descargado exitosamente` 
     });
-    
-    // Limpiar mensaje después de 5 segundos
     setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
   };
 
+  // Función para exportar CSV
   const exportToCSV = () => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes seleccionar un proyecto para exportar' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     const csvData = materials.map(material => [
-      material.id,
-      material.name,
-      material.description,
-      material.category,
-      material.brand,
-      material.color || '',
-      material.size || '',
-      material.dimensions || '',
-      material.unit,
-      material.quantity,
-      material.minQuantity,
-      material.price,
-      material.quantity * material.price,
-      material.location,
-      material.supplier || '',
-      material.notes || '',
-      new Date(material.createdAt).toLocaleDateString('es-ES'),
+      material.id, material.name, material.description, material.category,
+      material.brand, material.color || '', material.size || '', material.dimensions || '',
+      material.unit, material.quantity, material.minQuantity, material.price,
+      material.quantity * material.price, material.location, material.supplier || '',
+      material.notes || '', new Date(material.createdAt).toLocaleDateString('es-ES'),
       new Date(material.updatedAt).toLocaleDateString('es-ES')
     ]);
 
@@ -240,43 +383,57 @@ export default function Home() {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `Inventario_Construccion_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `${currentProject.name}_Inventario_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    // Mostrar mensaje de éxito
     setImportStatus({ 
       type: 'success', 
       message: `Archivo CSV descargado exitosamente` 
     });
-    
-    // Limpiar mensaje después de 5 segundos
     setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
   };
 
+  // Función para exportar JSON
   const exportToJSON = () => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes seleccionar un proyecto para exportar' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     const dataStr = JSON.stringify(materials, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Inventario_Construccion_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `${currentProject.name}_Inventario_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
     
-    // Mostrar mensaje de éxito
     setImportStatus({ 
       type: 'success', 
       message: `Archivo JSON descargado exitosamente` 
     });
-    
-    // Limpiar mensaje después de 5 segundos
     setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
   };
 
+  // Función para importar archivo al proyecto actual
   const importFromExcel = (file: File) => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes crear o seleccionar un proyecto primero' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -387,14 +544,50 @@ export default function Home() {
           );
           
           if (shouldReplace) {
-            setMaterials(importedMaterials);
+            const updatedMaterials = importedMaterials;
+            setMaterials(updatedMaterials);
+            
+            // Actualizar el proyecto en la lista
+            setProjects(prev => prev.map(project =>
+              project.id === currentProject.id
+                ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+                : project
+            ));
+            
+            // Actualizar el proyecto actual
+            setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+            
             setImportStatus({ type: 'success', message: `Se importaron ${importedMaterials.length} materiales reemplazando los existentes` });
           } else {
-            setMaterials(prev => [...prev, ...importedMaterials]);
+            const updatedMaterials = [...materials, ...importedMaterials];
+            setMaterials(updatedMaterials);
+            
+            // Actualizar el proyecto en la lista
+            setProjects(prev => prev.map(project =>
+              project.id === currentProject.id
+                ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+                : project
+            ));
+            
+            // Actualizar el proyecto actual
+            setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+            
             setImportStatus({ type: 'success', message: `Se agregaron ${importedMaterials.length} nuevos materiales al inventario existente` });
           }
         } else {
-          setMaterials(importedMaterials);
+          const updatedMaterials = importedMaterials;
+          setMaterials(updatedMaterials);
+          
+          // Actualizar el proyecto en la lista
+          setProjects(prev => prev.map(project =>
+            project.id === currentProject.id
+              ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+              : project
+          ));
+          
+          // Actualizar el proyecto actual
+          setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+          
           setImportStatus({ type: 'success', message: `Se importaron ${importedMaterials.length} materiales exitosamente` });
         }
 
@@ -414,7 +607,17 @@ export default function Home() {
     reader.readAsArrayBuffer(file);
   };
 
+  // Función para importar CSV
   const importFromCSV = (file: File) => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes crear o seleccionar un proyecto primero' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -522,14 +725,50 @@ export default function Home() {
           );
           
           if (shouldReplace) {
-            setMaterials(importedMaterials);
+            const updatedMaterials = importedMaterials;
+            setMaterials(updatedMaterials);
+            
+            // Actualizar el proyecto en la lista
+            setProjects(prev => prev.map(project =>
+              project.id === currentProject.id
+                ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+                : project
+            ));
+            
+            // Actualizar el proyecto actual
+            setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+            
             setImportStatus({ type: 'success', message: `Se importaron ${importedMaterials.length} materiales reemplazando los existentes` });
           } else {
-            setMaterials(prev => [...prev, ...importedMaterials]);
+            const updatedMaterials = [...materials, ...importedMaterials];
+            setMaterials(updatedMaterials);
+            
+            // Actualizar el proyecto en la lista
+            setProjects(prev => prev.map(project =>
+              project.id === currentProject.id
+                ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+                : project
+            ));
+            
+            // Actualizar el proyecto actual
+            setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+            
             setImportStatus({ type: 'success', message: `Se agregaron ${importedMaterials.length} nuevos materiales al inventario existente` });
           }
         } else {
-          setMaterials(importedMaterials);
+          const updatedMaterials = importedMaterials;
+          setMaterials(updatedMaterials);
+          
+          // Actualizar el proyecto en la lista
+          setProjects(prev => prev.map(project =>
+            project.id === currentProject.id
+              ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+              : project
+          ));
+          
+          // Actualizar el proyecto actual
+          setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+          
           setImportStatus({ type: 'success', message: `Se importaron ${importedMaterials.length} materiales exitosamente` });
         }
 
@@ -549,7 +788,17 @@ export default function Home() {
     reader.readAsText(file);
   };
 
+  // Función para importar JSON
   const importFromJSON = (file: File) => {
+    if (!currentProject) {
+      setImportStatus({ 
+        type: 'error', 
+        message: 'Debes crear o seleccionar un proyecto primero' 
+      });
+      setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -598,14 +847,48 @@ export default function Home() {
           );
           
           if (shouldReplace) {
-            setMaterials(importedMaterials);
+            const updatedMaterials = importedMaterials;
+            setMaterials(updatedMaterials);
+            
+            // Actualizar el proyecto en la lista
+            setProjects(prev => prev.map(project =>
+              project.id === currentProject.id
+                ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+                : project
+            ));
+            
+            // Actualizar el proyecto actual
+            setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+            
             setImportStatus({ type: 'success', message: `Se importaron ${importedMaterials.length} materiales reemplazando los existentes` });
           } else {
-            setMaterials(prev => [...prev, ...importedMaterials]);
+            const updatedMaterials = [...materials, ...importedMaterials];
+            setMaterials(updatedMaterials);
+            setProjects(prev => prev.map(project =>
+              project.id === currentProject.id
+                ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+                : project
+            ));
+            
+            // Actualizar el proyecto actual
+            setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+            
             setImportStatus({ type: 'success', message: `Se agregaron ${importedMaterials.length} nuevos materiales al inventario existente` });
           }
         } else {
-          setMaterials(importedMaterials);
+          const updatedMaterials = importedMaterials;
+          setMaterials(updatedMaterials);
+          
+          // Actualizar el proyecto en la lista
+          setProjects(prev => prev.map(project =>
+            project.id === currentProject.id
+              ? { ...project, materials: updatedMaterials, updatedAt: new Date().toISOString() }
+              : project
+          ));
+          
+          // Actualizar el proyecto actual
+          setCurrentProject(prev => prev ? { ...prev, materials: updatedMaterials, updatedAt: new Date().toISOString() } : null);
+          
           setImportStatus({ type: 'success', message: `Se importaron ${importedMaterials.length} materiales exitosamente` });
         }
 
@@ -671,134 +954,301 @@ export default function Home() {
       <div className="bg-blue-900 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold">🏗️ Inventario de Materiales - RMT Soluciones</h1>
-          <p className="text-blue-100 mt-2">Gestión completa de materiales y suministros</p>
+          <p className="text-blue-100 mt-2">Gestión completa de materiales y suministros por proyecto</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Panel de importación/exportación */}
+        {/* Panel de proyectos */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Importar y Exportar Inventario</h3>
-          
-          {/* Mensajes de estado */}
-          {importStatus.type && (
-            <div className={`mb-4 p-3 rounded-lg ${
-              importStatus.type === 'success' 
-                ? 'bg-green-100 text-green-800 border border-green-200' 
-                : 'bg-red-100 text-red-800 border border-red-200'
-            }`}>
-              {importStatus.message}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Gestión de Proyectos</h3>
+            <button
+              onClick={() => setShowProjectForm(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              + Nuevo Proyecto
+            </button>
+          </div>
+
+          {/* Lista de proyectos */}
+          {projects.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map(project => (
+                <div
+                  key={project.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                    currentProject?.id === project.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => switchProject(project)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-gray-900">{project.name}</h4>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingProject(project);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-sm"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteProject(project.id);
+                        }}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {project.fileName ? `Archivo: ${project.fileName}` : 'Sin archivo inicial'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {project.materials.length} materiales • 
+                    Creado: {new Date(project.createdAt).toLocaleDateString('es-ES')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p className="mb-4">No hay proyectos creados</p>
+              <p className="text-sm">Crea tu primer proyecto para comenzar a gestionar el inventario</p>
             </div>
           )}
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Panel de Importación */}
-            <div>
-              <h4 className="text-md font-medium text-gray-700 mb-3"> Importar Datos</h4>
-              <div className="space-y-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls,.csv,.json"
-                  onChange={handleFileImport}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-                <p className="text-xs text-gray-500">
-                  Formatos soportados: Excel (.xlsx, .xls), CSV (.csv), JSON (.json)
-                </p>
-                <div className="text-xs text-gray-600 space-y-1">
-                  <p><strong>Campos requeridos:</strong> Nombre, Categoría, Ubicación</p>
-                  <p><strong>Campos opcionales:</strong> Descripción, Marca, Color, Tamaño, Medidas, Unidad, Cantidad, Precio, Proveedor, Notas</p>
+        {/* Formulario de proyecto (modal) */}
+        {showProjectForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+              </h3>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const name = formData.get('name') as string;
+                const fileName = formData.get('fileName') as string;
+                
+                if (editingProject) {
+                  updateProject(editingProject.id, { name, fileName: fileName || undefined });
+                } else {
+                  createProject({ name, fileName: fileName || undefined });
+                }
+              }}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre del Proyecto *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      defaultValue={editingProject?.name || ''}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Ej: Casa Residencial A"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre del Archivo Excel (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      id="fileName"
+                      name="fileName"
+                      defaultValue={editingProject?.fileName || ''}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Ej: inventario_casa_a.xlsx"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Solo se solicita si el proyecto no ha empezado
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {editingProject ? 'Actualizar' : 'Crear'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProjectForm(false);
+                      setEditingProject(null);
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Solo mostrar el resto de la interfaz si hay un proyecto seleccionado */}
+        {currentProject ? (
+          <>
+            {/* Panel de importación/exportación */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Importar y Exportar Inventario - Proyecto: {currentProject.name}
+              </h3>
+              
+              {/* Mensajes de estado */}
+              {importStatus.type && (
+                <div className={`mb-4 p-3 rounded-lg ${
+                  importStatus.type === 'success' 
+                    ? 'bg-green-100 text-green-800 border border-green-200' 
+                    : 'bg-red-100 text-red-800 border border-red-200'
+                }`}>
+                  {importStatus.message}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Panel de Importación */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-700 mb-3"> Importar Datos</h4>
+                  <div className="space-y-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".xlsx,.xls,.csv,.json"
+                      onChange={handleFileImport}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Formatos soportados: Excel (.xlsx, .xls), CSV (.csv), JSON (.json)
+                    </p>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p><strong>Campos requeridos:</strong> Nombre, Categoría, Ubicación</p>
+                      <p><strong>Campos opcionales:</strong> Descripción, Marca, Color, Tamaño, Medidas, Unidad, Cantidad, Precio, Proveedor, Notas</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Panel de Exportación */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-700 mb-3"> Exportar Datos</h4>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={exportToExcel}
+                      disabled={materials.length === 0}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      📊 Excel
+                    </button>
+                    <button
+                      onClick={exportToCSV}
+                      disabled={materials.length === 0}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      📄 CSV
+                    </button>
+                    <button
+                      onClick={exportToJSON}
+                      disabled={materials.length === 0}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      🔧 JSON
+                    </button>
+                  </div>
+                  {materials.length === 0 && (
+                    <p className="text-xs text-gray-500 mt-2">No hay materiales para exportar</p>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Panel de Exportación */}
-            <div>
-              <h4 className="text-md font-medium text-gray-700 mb-3"> Exportar Datos</h4>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={exportToExcel}
-                  disabled={materials.length === 0}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  📊 Excel
-                </button>
-                <button
-                  onClick={exportToCSV}
-                  disabled={materials.length === 0}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  📄 CSV
-                </button>
-                <button
-                  onClick={exportToJSON}
-                  disabled={materials.length === 0}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  🔧 JSON
-                </button>
-              </div>
-              {materials.length === 0 && (
-                <p className="text-xs text-gray-500 mt-2">No hay materiales para exportar</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Panel izquierdo - Formulario */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
-              <MaterialForm
-                onSubmit={addMaterial}
-                onUpdate={updateMaterial}
-                editingMaterial={editingMaterial}
-                onCancelEdit={() => setEditingMaterial(null)}
-                categories={categories}
-              />
-            </div>
-          </div>
-
-          {/* Panel derecho - Lista y estadísticas */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Filtros y búsqueda */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    placeholder="Buscar materiales..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Panel izquierdo - Formulario */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+                  <MaterialForm
+                    onSubmit={addMaterial}
+                    onUpdate={updateMaterial}
+                    editingMaterial={editingMaterial}
+                    onCancelEdit={() => setEditingMaterial(null)}
+                    categories={categories}
                   />
                 </div>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Todas las categorías</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
+              </div>
+
+              {/* Panel derecho - Lista y estadísticas */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Filtros y búsqueda */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Buscar materiales..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="all">Todas las categorías</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Estadísticas */}
+                <MaterialStats materials={filteredMaterials} />
+
+                {/* Lista de materiales */}
+                <MaterialList
+                  materials={filteredMaterials}
+                  onEdit={setEditingMaterial}
+                  onDelete={deleteMaterial}
+                  onUpdateQuantity={updateQuantity}
+                />
               </div>
             </div>
-
-            {/* Estadísticas */}
-            <MaterialStats materials={filteredMaterials} />
-
-            {/* Lista de materiales */}
-            <MaterialList
-              materials={filteredMaterials}
-              onEdit={setEditingMaterial}
-              onDelete={deleteMaterial}
-              onUpdateQuantity={updateQuantity}
-            />
+          </>
+        ) : (
+          /* Mensaje cuando no hay proyecto seleccionado */
+          <div className="text-center py-16">
+            <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-auto">
+              <div className="text-6xl mb-4">🏗️</div>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">No hay proyecto seleccionado</h3>
+              <p className="text-gray-600 mb-6">
+                Crea un nuevo proyecto o selecciona uno existente para comenzar a gestionar el inventario de materiales.
+              </p>
+              <button
+                onClick={() => setShowProjectForm(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Crear Primer Proyecto
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
