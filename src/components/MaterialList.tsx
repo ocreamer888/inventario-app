@@ -43,7 +43,7 @@ export function MaterialList({ materials, onEdit, onDelete, onUpdateQuantity }: 
 
   if (materials.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+      <div className="bg-white rounded-3xl shadow-md p-8 text-center">
         <div className="text-gray-400 text-6xl mb-4">📦</div>
         <h3 className="text-xl font-medium text-gray-600 mb-2">No hay materiales</h3>
         <p className="text-gray-500">Agrega tu primer material usando el formulario</p>
@@ -52,7 +52,7 @@ export function MaterialList({ materials, onEdit, onDelete, onUpdateQuantity }: 
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-3xl shadow-md overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-800">
           Materiales ({materials.length})
@@ -122,19 +122,19 @@ export function MaterialList({ materials, onEdit, onDelete, onUpdateQuantity }: 
                         placeholder="Cantidad"
                         value={quantityInputs[material.id] || ''}
                         onChange={(e) => handleQuantityChange(material.id, e.target.value)}
-                        className="w-20 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                        className="w-20 px-2 py-1 text-xs border text-gray-900 border-gray-300 rounded-full focus:ring-1 focus:ring-blue-500"
                         min="0"
                         step="0.01"
                       />
                       <button
                         onClick={() => handleQuantityUpdate(material.id, 'add')}
-                        className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                        className="px-4 py-2 text-xs bg-green-600 text-white rounded-full hover:bg-green-700"
                       >
                         +
                       </button>
                       <button
                         onClick={() => handleQuantityUpdate(material.id, 'subtract')}
-                        className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                        className="px-4 py-2 text-xs bg-red-600 text-white rounded-full hover:bg-red-700"
                       >
                         -
                       </button>
@@ -144,7 +144,7 @@ export function MaterialList({ materials, onEdit, onDelete, onUpdateQuantity }: 
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">{material.location}</div>
                   {material.supplier && (
-                    <div className="text-xs text-gray-500">Proveedor: {material.supplier}</div>
+                    <div className="text-xs text-gray-900">Proveedor: {material.supplier}</div>
                   )}
                 </td>
                 <td className="px-6 py-4">

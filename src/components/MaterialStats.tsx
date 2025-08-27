@@ -23,7 +23,7 @@ export function MaterialStats({ materials }: MaterialStatsProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-3xl shadow-md p-6">
         <div className="flex items-center">
           <div className="p-2 bg-blue-100 rounded-lg">
             <span className="text-2xl">📦</span>
@@ -35,7 +35,7 @@ export function MaterialStats({ materials }: MaterialStatsProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-3xl shadow-md p-6">
         <div className="flex items-center">
           <div className="p-2 bg-green-100 rounded-lg">
             <span className="text-2xl">💰</span>
@@ -47,7 +47,7 @@ export function MaterialStats({ materials }: MaterialStatsProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-3xl shadow-md p-6">
         <div className="flex items-center">
           <div className="p-2 bg-yellow-100 rounded-lg">
             <span className="text-2xl">⚠️</span>
@@ -59,7 +59,7 @@ export function MaterialStats({ materials }: MaterialStatsProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-3xl shadow-md p-6">
         <div className="flex items-center">
           <div className="p-2 bg-red-100 rounded-lg">
             <span className="text-2xl">🚫</span>
@@ -72,7 +72,7 @@ export function MaterialStats({ materials }: MaterialStatsProps) {
       </div>
 
       {topCategories.length > 0 && (
-        <div className="md:col-span-2 lg:col-span-4 bg-white rounded-lg shadow-md p-6">
+        <div className="md:col-span-2 lg:col-span-4 bg-white rounded-3xl shadow-md p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Categorías Principales</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {topCategories.map(([category, count]) => (

@@ -106,7 +106,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
             value={formData.name}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Ej: Cemento Portland"
           />
         </div>
@@ -120,7 +120,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
             value={formData.description}
             onChange={handleInputChange}
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Descripción detallada del material"
           />
         </div>
@@ -135,7 +135,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               value={formData.category}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Seleccionar categoría</option>
               {categories.map(category => (
@@ -153,7 +153,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               name="brand"
               value={formData.brand}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: CEMEX"
             />
           </div>
@@ -169,7 +169,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               name="color"
               value={formData.color}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: Gris"
             />
           </div>
@@ -183,7 +183,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               name="size"
               value={formData.size}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: Grande"
             />
           </div>
@@ -197,7 +197,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               name="dimensions"
               value={formData.dimensions}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: 20x40x10cm"
             />
           </div>
@@ -213,7 +213,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               value={formData.unit}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {units.map(unit => (
                 <option key={unit} value={unit}>{unit}</option>
@@ -231,7 +231,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               value={formData.location}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: Almacén A, Estante 3"
             />
           </div>
@@ -250,7 +250,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               required
               min="0"
               step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -266,7 +266,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               required
               min="0"
               step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -281,7 +281,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               onChange={handleInputChange}
               min="0"
               step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="0.00"
             />
           </div>
@@ -296,7 +296,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
             name="supplier"
             value={formData.supplier}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Nombre del proveedor"
           />
         </div>
@@ -310,7 +310,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
             value={formData.notes}
             onChange={handleInputChange}
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Información adicional, especificaciones técnicas, etc."
           />
         </div>
@@ -327,7 +327,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
               <button
                 type="button"
                 onClick={onCancelEdit}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
               >
                 Cancelar
               </button>
@@ -335,7 +335,7 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
           ) : (
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+              className="w-full bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-700 transition-colors"
             >
               Agregar Material
             </button>

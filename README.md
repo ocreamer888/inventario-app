@@ -93,3 +93,32 @@ Una aplicación web moderna y completa para la gestión de inventario de materia
 - [ ] Optimización de rendimiento
 
 **Desarrollado por OcreamerStudio**
+
+
+## 📦🚀 Estructura de Archivo Excel
+
+El orden de las casillas en el archivo Excel es el siguiente:
+
+    // Preparar datos para Excel
+    const excelData = materials.map(material => ({
+      'ID': material.id,
+      'Nombre': material.name,
+      'Descripción': material.description,
+      'Categoría': material.category,
+      'Marca': material.brand,
+      'Color': material.color || '',
+      'Tamaño': material.size || '',
+      'Medidas': material.dimensions || '',
+      'Unidad': material.unit,
+      'Cantidad Actual': material.quantity,
+      'Cantidad Mínima': material.minQuantity,
+      'Precio por Unidad': material.price,
+      'Valor Total': material.quantity * material.price,
+      'Ubicación': material.location,
+      'Proveedor': material.supplier || '',
+      'Notas': material.notes || '',
+      'Fecha Creación': new Date(material.createdAt).toLocaleDateString('es-ES'),
+      'Última Actualización': new Date(material.updatedAt).toLocaleDateString('es-ES')
+    }));
+
+    

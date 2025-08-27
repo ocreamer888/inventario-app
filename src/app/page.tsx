@@ -6,6 +6,7 @@ import { MaterialList } from '../components/MaterialList';
 import { MaterialStats } from '../components/MaterialStats';
 import { Material, Project } from '@/types/material';
 import * as XLSX from 'xlsx';
+import Image from 'next/image';
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -950,22 +951,36 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-blue-900 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold">🏗️ Inventario de Materiales - RMT Soluciones</h1>
-          <p className="text-blue-100 mt-2">Gestión completa de materiales y suministros por proyecto</p>
+    <div className="min-h-screen bg-gray-200">
+      <div className="relative flex justify-center items-center">
+      <div className="relative w-full bg-blue-900 flex justify-between items-center m-4 text-white rounded-full shadow-lg p-4 px-4 md:px-12">
+        <div className="relative flex flex-col justify-center items-center">
+          <Image src="/RMT LOGO WHITE.svg" alt="RMT Soluciones" width={200} height={200} />
         </div>
+        <div className="flex flex-col justify-start items-start max-w-xl text-left">
+            
+            
+              <a href="https://www.rmtsoluciones.com" target="_blank" rel="noopener noreferrer" className="bg-gray-900 p-2 rounded-full text-orange-400 hover:text-orange-600">
+                www.rmtsoluciones.com
+              </a>
+            
+          
+          </div>
       </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      </div>
+      <div className="max-w-7xl mx-auto px-4">
+      <div className="flex flex-col justify-center items-center py-8 text-center">
+            <h1 className="text-gray-900 mt-2 text-2xl font-bold">🏗️ Inventario de Materiales de Construcción</h1>
+            <p className="text-gray-900 mt-2">Gestor de inventario de materiales para proyectos de construcción, constructoras y ferreterías.
+          </p>
+          </div>
         {/* Panel de proyectos */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="bg-white rounded-3xl shadow-md p-6 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center  gap-4 mb-4">
             <h3 className="text-lg font-medium text-gray-900">Gestión de Proyectos</h3>
             <button
               onClick={() => setShowProjectForm(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-blue-700 text-white rounded-3xl hover:bg-blue-700 transition-colors"
             >
               + Nuevo Proyecto
             </button>
@@ -1027,8 +1042,8 @@ export default function Home() {
 
         {/* Formulario de proyecto (modal) */}
         {showProjectForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
               </h3>
@@ -1056,7 +1071,7 @@ export default function Home() {
                       name="name"
                       defaultValue={editingProject?.name || ''}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Ej: Casa Residencial A"
                     />
                   </div>
@@ -1070,7 +1085,7 @@ export default function Home() {
                       id="fileName"
                       name="fileName"
                       defaultValue={editingProject?.fileName || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Ej: inventario_casa_a.xlsx"
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -1082,7 +1097,7 @@ export default function Home() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex-1 px-4 py-2 bg-blue-700 text-white rounded-full hover:bg-blue-700 transition-colors"
                   >
                     {editingProject ? 'Actualizar' : 'Crear'}
                   </button>
@@ -1092,7 +1107,7 @@ export default function Home() {
                       setShowProjectForm(false);
                       setEditingProject(null);
                     }}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-900 rounded-full hover:bg-gray-400 transition-colors"
                   >
                     Cancelar
                   </button>
@@ -1106,14 +1121,14 @@ export default function Home() {
         {currentProject ? (
           <>
             {/* Panel de importación/exportación */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="bg-white rounded-3xl shadow-md p-6 mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Importar y Exportar Inventario - Proyecto: {currentProject.name}
               </h3>
               
               {/* Mensajes de estado */}
               {importStatus.type && (
-                <div className={`mb-4 p-3 rounded-lg ${
+                <div className={`mb-4 p-3 rounded-3xl ${
                   importStatus.type === 'success' 
                     ? 'bg-green-100 text-green-800 border border-green-200' 
                     : 'bg-red-100 text-red-800 border border-red-200'
@@ -1132,7 +1147,7 @@ export default function Home() {
                       type="file"
                       accept=".xlsx,.xls,.csv,.json"
                       onChange={handleFileImport}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-3xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                     <p className="text-xs text-gray-500">
                       Formatos soportados: Excel (.xlsx, .xls), CSV (.csv), JSON (.json)
@@ -1151,21 +1166,21 @@ export default function Home() {
                     <button
                       onClick={exportToExcel}
                       disabled={materials.length === 0}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 bg-green-600 text-white rounded-3xl hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       📊 Excel
                     </button>
                     <button
                       onClick={exportToCSV}
                       disabled={materials.length === 0}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-3xl hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       📄 CSV
                     </button>
                     <button
                       onClick={exportToJSON}
                       disabled={materials.length === 0}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 bg-purple-600 text-white rounded-3xl hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       🔧 JSON
                     </button>
@@ -1180,7 +1195,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Panel izquierdo - Formulario */}
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+                <div className="bg-white rounded-3xl shadow-md p-6 sticky top-8">
                   <MaterialForm
                     onSubmit={addMaterial}
                     onUpdate={updateMaterial}
@@ -1194,7 +1209,7 @@ export default function Home() {
               {/* Panel derecho - Lista y estadísticas */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Filtros y búsqueda */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white rounded-3xl shadow-md p-6">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                       <input
@@ -1202,13 +1217,13 @@ export default function Home() {
                         placeholder="Buscar materiales..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 text-gray-900 rounded-3xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     <select
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-4 py-2 border border-gray-300 text-gray-900 rounded-3xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="all">Todas las categorías</option>
                       {categories.map(category => (
@@ -1234,7 +1249,7 @@ export default function Home() {
         ) : (
           /* Mensaje cuando no hay proyecto seleccionado */
           <div className="text-center py-16">
-            <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-auto">
+            <div className="bg-white rounded-3xl shadow-md p-8 max-w-md mx-auto">
               <div className="text-6xl mb-4">🏗️</div>
               <h3 className="text-xl font-medium text-gray-900 mb-2">No hay proyecto seleccionado</h3>
               <p className="text-gray-600 mb-6">
@@ -1242,7 +1257,7 @@ export default function Home() {
               </p>
               <button
                 onClick={() => setShowProjectForm(true)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-3 bg-blue-700 text-white rounded-full hover:bg-blue-700 transition-colors"
               >
                 Crear Primer Proyecto
               </button>
