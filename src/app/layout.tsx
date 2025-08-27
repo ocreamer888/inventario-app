@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: "Sistema completo de gestión de inventario para proyectos de construcción. Optimiza tu control de materiales con RMT Soluciones.",
     images: [
       {
-        url: "/fondo rmt.png",
+        url: "/fondo-rmt.png",
         width: 1200,
         height: 630,
         alt: "Inventario App - RMT Soluciones - Gestión Profesional de Materiales de Construcción",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     creator: "@rmtsoluciones",
     title: "Inventario App - Gestión Profesional de Materiales de Construcción",
     description: "Sistema completo de gestión de inventario para proyectos de construcción. Optimiza tu control de materiales con RMT Soluciones.",
-    images: ["/fondo rmt.png"],
+    images: ["/fondo-rmt.png"],
   },
   
   // Additional meta tags
