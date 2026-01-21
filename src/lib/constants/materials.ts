@@ -1,0 +1,21 @@
+export const MATERIAL_CATEGORIES: string[] = [
+  'Cemento y Mortero',
+  'Ladrillos y Bloques',
+  'Acero y Metal',
+  'Madera',
+  'Pinturas y Barnices',
+  'Plomería',
+  'Eléctrico',
+  'Herramientas',
+  'Pisos y Revestimientos',
+  'Cerramientos',
+  'Techos',
+  'Ventanas y Puertas',
+  'Impermeabilizantes',
+  'Sellantes y Selladoras',
+  'Aislamientos',
+  'Protecciones',
+  'Detección de Incendios',
+  'Supresión de Incendios',
+  'Otros'
+];

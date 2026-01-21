@@ -1,9 +1,12 @@
 # 🏗️ Inventario de Construcción
 
-Una aplicación web moderna y completa para la gestión de inventario de materiales de construcción, construida con Next.js 15, React 19 y TypeScript.
+Una aplicación web moderna y completa para la gestión de inventario de materiales de construcción, construida con Next.js 16, React 19 y TypeScript.
 
 ## ✨ Características Principales
 
+- **Dashboard de Analytics con Gráficos**: Visualización completa con 8+ tipos de gráficos interactivos (NUEVO ⭐)
+- **Análisis Inteligente**: KPIs, métricas avanzadas y alertas automáticas de materiales críticos
+- **Gestión Multi-Proyecto**: Maneja múltiples proyectos de construcción independientes
 - **Gestión Completa de Materiales**: Agregar, editar, eliminar y rastrear materiales de construcción
 - **Categorización Inteligente**: Organización por categorías predefinidas (cemento, acero, madera, etc.)
 - **Control de Stock**: Monitoreo de cantidades actuales y mínimas con alertas
@@ -11,16 +14,51 @@ Una aplicación web moderna y completa para la gestión de inventario de materia
 - **Importación/Exportación**: Soporte para Excel (.xlsx), CSV y JSON
 - **Persistencia Local**: Almacenamiento en localStorage del navegador
 - **Interfaz Responsiva**: Diseño moderno y adaptable a todos los dispositivos
-- **Estadísticas en Tiempo Real**: Resumen del inventario con métricas importantes
 
 ## 🚀 Tecnologías Utilizadas
 
-- **Frontend**: Next.js 15, React 19, TypeScript
+- **Frontend**: Next.js 16, React 19, TypeScript
 - **Estilos**: Tailwind CSS 4
+- **Visualización de Datos**: Recharts (gráficos interactivos)
+- **Iconos**: Lucide React
 - **Gestión de Datos**: XLSX para importación/exportación de Excel
-- **Estado**: React Hooks (useState, useEffect)
+- **Estado**: React Hooks (useState, useEffect, useCallback)
+- **Autenticación**: Supabase Auth
 
 ## 📋 Funcionalidades Detalladas
+
+### 📊 Dashboard de Analytics (NUEVO)
+- **Tres Vistas Interactivas**:
+  - **Resumen**: Vista general con estadísticas y alertas
+  - **Análisis Avanzado**: KPIs y métricas detalladas
+  - **Gráficos Detallados**: 8+ visualizaciones interactivas
+
+- **Gráficos Disponibles**:
+  - Distribución por Categoría (Pie Chart)
+  - Valor Total por Categoría (Bar Chart)
+  - Estado de Inventario (Pie Chart con colores por estado)
+  - Top 10 Materiales por Valor (Horizontal Bar)
+  - Materiales por Ubicación (Bar Chart)
+  - Distribución de Precios (Area Chart)
+  - Eficiencia de Stock por Categoría (Radar Chart)
+
+- **Métricas Inteligentes**:
+  - Valor Promedio por Unidad
+  - Salud del Inventario (%)
+  - Categorías y Marcas Activas
+  - Ubicaciones de Almacenamiento
+  - Material Más Valioso
+  - Análisis de Rotación Lenta
+
+- **Alertas Automáticas**:
+  - Identificación de materiales críticos (stock bajo + alto valor)
+  - Top 5 materiales que requieren atención inmediata
+  - Materiales con exceso de stock (>30 días sin movimiento)
+
+### Gestión de Proyectos
+- **Múltiples Proyectos**: Maneja varios proyectos de forma independiente
+- **Cambio Rápido**: Alterna entre proyectos con un clic
+- **Dashboard Individual**: Cada proyecto tiene su propio dashboard y analytics
 
 ### Gestión de Materiales
 - **Campos Requeridos**: Nombre, Categoría, Ubicación
@@ -94,6 +132,28 @@ Una aplicación web moderna y completa para la gestión de inventario de materia
 
 **Desarrollado por OcreamerStudio**
 
+## 📖 Documentación Adicional
+
+- **[DASHBOARD_FEATURES.md](./DASHBOARD_FEATURES.md)**: Descripción técnica completa del dashboard
+- **[DASHBOARD_USAGE_GUIDE.md](./DASHBOARD_USAGE_GUIDE.md)**: Guía de uso del dashboard para usuarios
+
+## 🎯 Inicio Rápido
+
+```bash
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+
+# Compilar para producción
+npm run build
+
+# Iniciar servidor de producción
+npm start
+```
+
+La aplicación estará disponible en `http://localhost:3000`
 
 ## 📦🚀 Estructura de Archivo Excel
 

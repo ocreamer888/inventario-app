@@ -1,5 +1,7 @@
 export interface Material {
   id: string;
+  project_id: string;
+  user_id: string;
   name: string;
   description: string;
   category: string;
@@ -37,9 +39,9 @@ export interface MaterialFormData {
 
 export interface Project {
   id: string;
+  user_id: string;
   name: string;
   fileName?: string;
-  materials: Material[];
   createdAt: string;
   updatedAt: string;
 }

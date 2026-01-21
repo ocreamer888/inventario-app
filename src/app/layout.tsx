@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +17,9 @@ export const metadata: Metadata = {
   title: "Inventario App - RMT Soluciones",
   description: "Gestor profesional de inventario de materiales para proyectos de construcción, constructoras y ferreterías. Optimiza tu gestión de materiales con RMT Soluciones.",
   keywords: ["inventario", "construcción", "materiales", "gestión", "proyectos", "RMT Soluciones"],
-  authors: [{ name: "RMT Soluciones" }],
-  creator: "RMT Soluciones",
-  publisher: "RMT Soluciones",
+  authors: [{ name: "Ocreamer Studio" }],
+  creator: "Marco Antonio Rodriguez",
+  publisher: "Ocreamer Studio",
   metadataBase: new URL("https://inventario-app-lilac.vercel.app"),
   formatDetection: {
     email: false,
@@ -120,7 +121,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

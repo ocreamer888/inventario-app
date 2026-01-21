@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Material, MaterialFormData } from '@/types/material';
 
 interface MaterialFormProps {
-  onSubmit: (material: Omit<Material, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (material: Omit<Material, 'id' | 'createdAt' | 'updatedAt' | 'project_id' | 'user_id'>) => void;
   onUpdate: (id: string, updates: Partial<Material>) => void;
   editingMaterial: Material | null;
   onCancelEdit: () => void;
@@ -76,6 +76,23 @@ export function MaterialForm({ onSubmit, onUpdate, editingMaterial, onCancelEdit
       onUpdate(editingMaterial.id, formData);
     } else {
       onSubmit(formData);
+      // Reset form after adding new material
+      setFormData({
+        name: '',
+        description: '',
+        category: '',
+        brand: '',
+        color: '',
+        size: '',
+        dimensions: '',
+        unit: 'unidades',
+        quantity: 0,
+        minQuantity: 0,
+        price: 0,
+        location: '',
+        supplier: '',
+        notes: ''
+      });
     }
   };
 
