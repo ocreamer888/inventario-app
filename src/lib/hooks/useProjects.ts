@@ -197,7 +197,7 @@ export function useProjects() {
     }
   }, [user, supabase]);
 
-  const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
+  const updateProject = useCallback(async (id: string, updates: Partial<Project>): Promise<Project | void> => {
     if (!user) {
       throw new Error('Debes iniciar sesión para actualizar un proyecto');
     }
