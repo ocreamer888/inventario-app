@@ -5,8 +5,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 
 interface UseMaterialsProps {
   currentProject: Project | null;
-  onProjectUpdate: (id: string, updates: Partial<Project>) => void;
-}
+  onProjectUpdate: (id: string, updates: Partial<Project>) => Promise<any>;}
 
 // Transform database material (snake_case) to app material (camelCase)
 function transformMaterialFromDB(dbMaterial: any): Material {
